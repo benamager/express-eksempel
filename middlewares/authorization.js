@@ -1,5 +1,3 @@
-import { request } from "express"
-
 // middlewares/auth.js
 const authorization = (req, res, next) => {
   const { authorization } = req.headers
