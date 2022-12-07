@@ -15,9 +15,10 @@ const storage = multer.diskStorage({
   },
 })
 
+// sharp til image compiling
+// multer rykket ind i en middleware funktion
+
 const upload = multer({ storage: storage, limits: { fileSize: 10000 } })
-
-
 
 const books = (app) => {
   app.route('/books/:id?') // ? means optional parameter
