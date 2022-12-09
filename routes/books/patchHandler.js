@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb"
 import useDB from "../../functions/useDB.js"
 
-const putHandler = async (req, res) => {
+const patchHandler = async (req, res) => {
   const bookId = req.params.id || null
   if (!bookId) {
     res.status(422).json({ message: "Id is required" })
@@ -11,10 +11,9 @@ const putHandler = async (req, res) => {
 
   // connect to db
   const { collection: booksCollection, client } = await useDB("BooksExpress", "books")
-
   try {
     // update book by id and return successfull message or 404
-    const result = await booksCollection.updateOne({ _id: ObjectId(bookId) }, { $set: req.body });
+    const result = await booksCollection.findOneAndUpdate({ _id: ObjectId(bookId) }, { $set: req.body });
     res.status(200).json({ message: `Book with id ${bookId} updated successfully.`, result: result })
   } catch (error) {
     res.status(404).json({ message: `Book with id <${bookId}> isn't found..!` })
@@ -23,4 +22,4 @@ const putHandler = async (req, res) => {
   client.close()
 }
 
-export default putHandler;
+export default patchHandler;
