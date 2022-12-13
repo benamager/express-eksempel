@@ -3,6 +3,7 @@ const PORT = process.env.PORT || 3000
 
 import books from "./routes/books/index.js"
 import users from "./routes/users/index.js"
+import auth from "./routes/auth/index.js"
 
 const app = express()
 app.use(express.static("./public")) // makes the public folder accessible
@@ -14,6 +15,9 @@ books(app)
 
 // auth route
 users(app)
+
+// auth route
+auth(app)
 
 // 404 route
 app.get("*", (req, res) => {

@@ -1,51 +1,45 @@
-import crypto from "crypto"
 import bcrypt from "bcrypt"
 import useDB from "../../functions/useDB.js"
 
-
-const postHandler = async (req, res) => {
-  const { username, password } = req.body;
-
-  // basic err handling
-  if (!username || !password) {
-    res.status(400).json({ message: "Username and password is required." }).end()
+// create user
+async function postHandler(req, res) {
+  if (!req.body.username || !req.body.password) {
+    res.status(400).json({ message: "Username and password should be provided." }).end()
     return
   }
 
-  const saltRounds = 10;
-  const hash = await bcrypt.hash(password, saltRounds)
-
-  const { collection: usersCollection, client } = await useDB("BooksExpress", "users") // connect to db
-
+  const { collection, client } = await useDB("BooksExpress", "users")
 
   // check if user already exists
-  const user = await usersCollection.findOne({ username: username });
-  if (user) {
-    res.status(403).json({ message: "User already exists." }).end()
+  const check = await collection.findOne({ username: req.body.username })
+  if (check !== null) {
+    res.status(403).json({ message: "User with that name already exists." }).end()
     return
   }
 
   // hash password
-  const salt = crypto.randomBytes(16).toString('hex');
-  const passwordHash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-
+  const saltRounds = 10
+  const hash = await bcrypt.hash(req.body.password, saltRounds)
 
   try {
-    const createdAt = { createdAt: Date.now() }
-    const newUser = {
-      $set: {
-        username: username,
-        password: passwordHash,
-      }
-    }
-    const result = await usersCollection.findOneAndUpdate(createdAt, newUser, { upsert: true, returnDocument: "after" })
+    const result = await collection.findOneAndUpdate(
+      { createdAt: Date.now() },
+      {
+        $set: {
+          username: req.body.username,
+          password: hash
+        }
+      },
+      { upsert: true, returnDocument: "after" }
+    )
+    client.close()
+
     res.status(201).json(result.value).end()
-
-
+    res.end()
   } catch (error) {
-    // send error if something went wrong
-    res.status(500).json({ message: "Something went wrong.", error: error })
+    console.log("create user error", error)
+    res.status(500).end()
   }
 }
 
-export default postHandler;
+export default postHandler
