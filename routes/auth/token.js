@@ -25,12 +25,12 @@ export default async function token(req, res) {
     }
 
     // if the password is wrong
-    if (await bcrypt.compare(req.body.password, user.password) === null) {
+    if (!await bcrypt.compare(req.body.password, user.password)) {
       res.status(403).json({ message: "Wrong username or password." }).end()
       return
     }
 
-    const newToken = jwt.sign({ username: user.username }, process.env.TOKEN_SECRET, { expiresIn: "1h" })
+    const newToken = jwt.sign({ username: user.username }, process.env.TOKEN_SECRET, { expiresIn: "1m" })
 
     res.status(201).json({ token: newToken }).end()
   } catch (error) {
