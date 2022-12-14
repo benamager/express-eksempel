@@ -30,7 +30,7 @@ export default async function token(req, res) {
       return
     }
 
-    const newToken = jwt.sign({ username: user.username }, process.env.TOKEN_SECRET, { expiresIn: "1m" })
+    const newToken = jwt.sign({ username: user.username }, process.env.TOKEN_SECRET, { expiresIn: "1h" })
 
     res.status(201).json({ token: newToken }).end()
   } catch (error) {
